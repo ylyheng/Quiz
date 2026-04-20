@@ -2,21 +2,36 @@
  * Generate and play sound effects using Web Audio API
  */
 
-const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+let audioContext = null;
+
+function getAudioContext() {
+  if (!audioContext && typeof window !== 'undefined') {
+    try {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) {
+      console.log("Audio context not available");
+      return null;
+    }
+  }
+  return audioContext;
+}
 
 /**
  * Play a correct answer sound (ascending tones)
  */
 export function playCorrectSound() {
   try {
-    const now = audioContext.currentTime;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    
+    const now = ctx.currentTime;
     const noteLength = 0.15;
 
     // First note (higher pitch)
-    const osc1 = audioContext.createOscillator();
-    const gain1 = audioContext.createGain();
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
     osc1.connect(gain1);
-    gain1.connect(audioContext.destination);
+    gain1.connect(ctx.destination);
     osc1.frequency.value = 800;
     osc1.type = "sine";
     gain1.gain.setValueAtTime(0.3, now);
@@ -25,10 +40,10 @@ export function playCorrectSound() {
     osc1.stop(now + noteLength);
 
     // Second note (even higher pitch)
-    const osc2 = audioContext.createOscillator();
-    const gain2 = audioContext.createGain();
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
     osc2.connect(gain2);
-    gain2.connect(audioContext.destination);
+    gain2.connect(ctx.destination);
     osc2.frequency.value = 1200;
     osc2.type = "sine";
     gain2.gain.setValueAtTime(0.3, now + noteLength);
@@ -45,13 +60,16 @@ export function playCorrectSound() {
  */
 export function playWrongSound() {
   try {
-    const now = audioContext.currentTime;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    
+    const now = ctx.currentTime;
     const duration = 0.3;
 
-    const osc = audioContext.createOscillator();
-    const gain = audioContext.createGain();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
     osc.connect(gain);
-    gain.connect(audioContext.destination);
+    gain.connect(ctx.destination);
     osc.type = "sine";
 
     // Frequency sweep down
@@ -73,14 +91,17 @@ export function playWrongSound() {
  */
 export function playTimeoutSound() {
   try {
-    const now = audioContext.currentTime;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    
+    const now = ctx.currentTime;
     const interval = 0.15;
 
     for (let i = 0; i < 3; i++) {
-      const osc = audioContext.createOscillator();
-      const gain = audioContext.createGain();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
       osc.connect(gain);
-      gain.connect(audioContext.destination);
+      gain.connect(ctx.destination);
       osc.frequency.value = 700;
       osc.type = "sine";
 
